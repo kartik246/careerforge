@@ -98,7 +98,7 @@ export const JobsView = {
             </div>
             <div>
               <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Prep Link</span>
-              <p style="font-size: 0.95rem;"><a href="#companies" style="color: var(--accent-indigo); text-decoration: none; font-weight: 600;">Syllabus Guide &rarr;</a></p>
+              <p style="font-size: 0.95rem;"><a href="/companies.html" style="color: var(--accent-indigo); text-decoration: none; font-weight: 600;">Syllabus Guide &rarr;</a></p>
             </div>
           </div>
 
@@ -392,7 +392,7 @@ export const JobsView = {
         // Update URL hash without reload to let router handle parameter state change,
         // or just re-render pane directly for instantaneous fluid feel!
         // Instantaneous pane re-render is much smoother:
-        window.location.hash = `#jobs?id=${id}`;
+        window.location.href = `/jobs.html?id=${id}`;
       });
     });
 
@@ -503,7 +503,7 @@ export const JobsView = {
           card.addEventListener('click', () => {
             const id = card.getAttribute('data-id');
             this.activeJobId = id;
-            window.location.hash = `#jobs?id=${id}`;
+            window.location.href = `/jobs.html?id=${id}`;
           });
         });
       });

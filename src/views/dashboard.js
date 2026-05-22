@@ -30,7 +30,7 @@ export const DashboardView = {
               <span class="badge ${p.difficulty === 'Easy' ? 'badge-emerald' : p.difficulty === 'Medium' ? 'badge-amber' : 'badge-rose'}">${p.difficulty}</span>
               <span style="font-size: 0.85rem; color: var(--text-muted); margin-left: 0.5rem;">${p.topic}</span>
             </div>
-            <a href="#dsa?id=${p.id}" class="btn btn-primary btn-sm">Solve <i class="fa-solid fa-play"></i></a>
+            <a href="/dsa.html?id=${p.id}" class="btn btn-primary btn-sm">Solve <i class="fa-solid fa-play"></i></a>
           </div>
         `).join('')
       : `<p style="color: var(--text-muted); font-size: 0.95rem;">🎉 You've solved all DSA Sheet problems! Excellent job!</p>`;
@@ -108,6 +108,15 @@ export const DashboardView = {
         <div class="dashboard-grid">
           <!-- Left Main Area -->
           <div style="display: flex; flex-direction: column; gap: 2rem;">
+            
+            <!-- Interactive Analytics Chart -->
+            <div class="glass-panel">
+              <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+                <i class="fa-solid fa-chart-area" style="color: var(--accent-cyan);"></i> Application Pipeline
+              </h3>
+              <div id="application-chart" style="min-height: 250px;"></div>
+            </div>
+
             <!-- Recommended Tasks -->
             <div class="glass-panel">
               <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
@@ -143,9 +152,16 @@ export const DashboardView = {
 
           <!-- Right Sidebar Area -->
           <div style="display: flex; flex-direction: column; gap: 2rem;">
+            
+            <!-- DSA Distribution Radar -->
+            <div class="glass-panel">
+               <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center;">Skill Distribution</h3>
+               <div id="skill-radar-chart"></div>
+            </div>
+
             <!-- Overall Progress Widget -->
             <div class="glass-panel" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
-              <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem;">Placement Readiness</h3>
+              <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem;">Placement Readiness</h3>
               
               <!-- Circular gauge SVG -->
               <div style="position: relative; width: 150px; height: 150px; margin-bottom: 1.5rem;">
@@ -216,5 +232,191 @@ export const DashboardView = {
         }
       });
     }
+
+    // Initialize Charts if ApexCharts is available
+    if (typeof ApexCharts !== 'undefined') {
+      this.renderApplicationChart();
+      this.renderSkillRadar();
+    }
+
+    this.initResumeAnalyzer();
+  },
+
+  initResumeAnalyzer() {
+    const uploadZone = document.getElementById('resume-upload-zone');
+    const fileInput = document.getElementById('resume-file-input');
+    const resultsContainer = document.getElementById('resume-analysis-results');
+    const matchList = document.getElementById('match-list');
+
+    if (!uploadZone || !fileInput) return;
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      uploadZone.style.opacity = '0.5';
+      uploadZone.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 2.5rem; color: var(--accent-cyan); margin-bottom: 1rem;"></i>
+        <p style="font-weight: 600;">Analyzing your resume...</p>
+      `;
+
+      const result = await stateStore.analyzeResume(file);
+
+      uploadZone.style.opacity = '1';
+      uploadZone.innerHTML = `
+        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+        <p style="font-weight: 600; margin-bottom: 0.25rem;">Upload Resume (PDF)</p>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">We'll analyze your skills and match you with the best roles.</p>
+      `;
+
+      if (result.success) {
+        resultsContainer.style.display = 'block';
+        matchList.innerHTML = result.recommendations.map(rec => `
+          <div class="glass-panel interactive" style="padding: 1rem; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02);">
+            <div>
+              <h5 style="font-weight: 700; margin-bottom: 0.25rem;">${rec.title}</h5>
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">${rec.company}</p>
+              <div style="display: flex; gap: 0.35rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                ${rec.matchedKeywords.slice(0, 3).map(word => `<span class="badge badge-emerald" style="font-size: 0.65rem;">${word}</span>`).join('')}
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent-emerald);">${rec.score}%</div>
+              <p style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Match Score</p>
+              <a href="/jobs.html?id=${rec.jobId}" class="btn btn-primary btn-sm" style="margin-top: 0.5rem; padding: 0.2rem 0.6rem; font-size: 0.75rem;">View</a>
+            </div>
+          </div>
+        `).join('');
+        
+        resultsContainer.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        alert('Analysis failed: ' + result.message);
+      }
+    });
+  },
+
+  renderApplicationChart() {
+    const state = stateStore.getState();
+    const apps = state.applications;
+    
+    // Count status distribution
+    const statusCounts = {
+      'Applied': 0,
+      'Under Review': 0,
+      'Interview Scheduled': 0,
+      'Offered': 0,
+      'Rejected': 0
+    };
+    
+    apps.forEach(app => {
+      if (statusCounts.hasOwnProperty(app.status)) {
+        statusCounts[app.status]++;
+      } else if (app.status === 'Offer Offered') {
+        statusCounts['Offered']++;
+      }
+    });
+
+    const options = {
+      series: [{
+        name: 'Applications',
+        data: Object.values(statusCounts)
+      }],
+      chart: {
+        type: 'bar',
+        height: 250,
+        toolbar: { show: false },
+        background: 'transparent'
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 8,
+          columnWidth: '50%',
+          distributed: true,
+        }
+      },
+      colors: ['#6366f1', '#06b6d4', '#8b5cf6', '#10b981', '#ef4444'],
+      dataLabels: { enabled: false },
+      legend: { show: false },
+      xaxis: {
+        categories: Object.keys(statusCounts),
+        labels: {
+          style: { colors: '#94a3b8', fontSize: '11px' }
+        },
+        axisBorder: { show: false },
+        axisTicks: { show: false }
+      },
+      yaxis: {
+        labels: {
+          style: { colors: '#94a3b8' }
+        }
+      },
+      grid: {
+        borderColor: 'rgba(255, 255, 255, 0.05)',
+        strokeDashArray: 4
+      },
+      theme: { mode: 'dark' }
+    };
+
+    const chart = new ApexCharts(document.querySelector("#application-chart"), options);
+    chart.render();
+  },
+
+  renderSkillRadar() {
+    const state = stateStore.getState();
+    const progress = state.dsaProgress;
+    
+    // Group problems by topic and count solved
+    const topicStats = {};
+    DSA_SHEET.forEach(p => {
+      if (!topicStats[p.topic]) topicStats[p.topic] = { total: 0, solved: 0 };
+      topicStats[p.topic].total++;
+      if (progress[p.id] === 'Solved') topicStats[p.topic].solved++;
+    });
+
+    const topics = Object.keys(topicStats);
+    const solvedData = topics.map(t => Math.round((topicStats[t].solved / topicStats[t].total) * 100));
+
+    const options = {
+      series: [{
+        name: 'Mastery %',
+        data: solvedData
+      }],
+      chart: {
+        height: 280,
+        type: 'radar',
+        toolbar: { show: false },
+        background: 'transparent'
+      },
+      colors: ['#06b6d4'],
+      xaxis: {
+        categories: topics,
+        labels: {
+          style: { colors: '#94a3b8', fontSize: '10px' }
+        }
+      },
+      yaxis: { show: false, min: 0, max: 100 },
+      fill: {
+        opacity: 0.2,
+        colors: ['#06b6d4']
+      },
+      stroke: {
+        show: true,
+        width: 2,
+        colors: ['#06b6d4'],
+        dashArray: 0
+      },
+      markers: {
+        size: 4,
+        colors: ['#06b6d4'],
+        strokeColor: '#fff',
+        strokeWidth: 2,
+      },
+      theme: { mode: 'dark' }
+    };
+
+    const chart = new ApexCharts(document.querySelector("#skill-radar-chart"), options);
+    chart.render();
   }
 };

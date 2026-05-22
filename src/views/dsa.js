@@ -185,7 +185,7 @@ export const DsaView = {
         const id = btn.getAttribute('data-id');
         this.activeProblemId = id;
         this.consoleLogs = []; // reset logs
-        window.location.hash = `#dsa?id=${id}`;
+        window.location.href = `/dsa.html?id=${id}`;
       });
     });
 
@@ -304,7 +304,7 @@ export const DsaView = {
         const id = btn.getAttribute('data-id');
         this.activeProblemId = id;
         this.consoleLogs = [];
-        window.location.hash = `#dsa?id=${id}`;
+        window.location.href = `/dsa.html?id=${id}`;
       });
     });
 
@@ -329,10 +329,22 @@ export const DsaView = {
     const resetBtn = document.getElementById('btn-reset-code');
     const activeProblem = DSA_SHEET.find(p => p.id === this.activeProblemId);
 
-    // Save code draft dynamically in localStorage
-    if (editorTextarea) {
-      editorTextarea.addEventListener('input', (e) => {
-        const currentCode = e.target.value;
+    // Initialize CodeMirror if available
+    let editor = null;
+    if (typeof CodeMirror !== 'undefined' && editorTextarea) {
+      editor = CodeMirror.fromTextArea(editorTextarea, {
+        mode: "javascript",
+        theme: "dracula",
+        lineNumbers: true,
+        autoCloseBrackets: true,
+        tabSize: 2,
+        indentUnit: 2,
+        viewportMargin: Infinity
+      });
+
+      // Save code draft dynamically in localStorage
+      editor.on('change', (instance) => {
+        const currentCode = instance.getValue();
         localStorage.setItem(`code_${this.activeProblemId}`, currentCode);
       });
     }
@@ -342,7 +354,9 @@ export const DsaView = {
       resetBtn.addEventListener('click', () => {
         if (confirm("Reset current editor code to starter template? Your edits will be discarded.")) {
           localStorage.removeItem(`code_${activeProblem.id}`);
-          if (editorTextarea) {
+          if (editor) {
+            editor.setValue(activeProblem.starterCode);
+          } else if (editorTextarea) {
             editorTextarea.value = activeProblem.starterCode;
           }
           this.consoleLogs = [];
@@ -352,12 +366,12 @@ export const DsaView = {
     }
 
     // Compile / Run Code Action
-    if (runBtn && activeProblem && editorTextarea) {
+    if (runBtn && activeProblem) {
       runBtn.addEventListener('click', () => {
         this.consoleLogs = [{ text: "🚀 Bundling testing framework... Running test checks.", type: "info" }];
         this.updateConsoleLogsHTML();
 
-        const userCode = editorTextarea.value;
+        const userCode = editor ? editor.getValue() : (editorTextarea ? editorTextarea.value : "");
 
         // Function map
         const fnNames = {
@@ -402,11 +416,10 @@ export const DsaView = {
               alert(`🏆 Success! "${activeProblem.title}" solved! Check your dashboard progress rate.`);
               
               // Rerender page container to sync overall sheet metrics and checklist selects
-              const container = document.getElementById('content-body');
-              if (container) {
-                container.innerHTML = this.getHTML();
-                this.init();
-              }
+              // NOTE: In MPA, we might need a full reload if we want to ensure everything is fresh, 
+              // but let's try to just re-init the view logic.
+              // For MPA, a reload might be cleaner to reset the editor state too.
+              window.location.reload();
             } else {
               this.consoleLogs.push({ text: `❌ ASSERTION ERROR: ${validationResult}`, type: "error" });
             }

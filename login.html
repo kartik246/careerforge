@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - CareerForge</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg-primary);">
+  <div class="glass-panel" style="width: 100%; max-width: 450px; padding: 3rem;">
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+      <div class="logo-icon" style="margin: 0 auto 1rem; width: 60px; height: 60px; font-size: 1.5rem;">CF</div>
+      <h1 style="font-size: 1.75rem; font-weight: 800; background: var(--grad-cyan-indigo); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome to CareerForge</h1>
+      <p style="color: var(--text-secondary); margin-top: 0.5rem;" id="form-subtitle">Login to access your placement dashboard</p>
+    </div>
+
+    <!-- Login Form -->
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="login-email" class="form-control" placeholder="name@company.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Sign In</button>
+      <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+        Don't have an account? <a href="#" id="show-register" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;">Create one</a>
+      </p>
+    </form>
+
+    <!-- Register Form (Hidden) -->
+    <form id="register-form" style="display: none;">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" id="reg-name" class="form-control" placeholder="Kartikey" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="reg-email" class="form-control" placeholder="name@company.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="reg-password" class="form-control" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Create Account</button>
+      <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+        Already have an account? <a href="#" id="show-login" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;">Sign in</a>
+      </p>
+    </form>
+
+    <div id="auth-error" style="display: none; margin-top: 1.5rem; padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--accent-rose-border); color: var(--accent-rose); border-radius: var(--radius-sm); text-align: center; font-size: 0.85rem;"></div>
+  </div>
+
+  <script type="module">
+    import { stateStore } from '/src/state.js';
+
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const showRegister = document.getElementById('show-register');
+    const showLogin = document.getElementById('show-login');
+    const subtitle = document.getElementById('form-subtitle');
+    const authError = document.getElementById('auth-error');
+
+    showRegister.addEventListener('click', (e) => {
+      e.preventDefault();
+      loginForm.style.display = 'none';
+      registerForm.style.display = 'block';
+      subtitle.textContent = 'Create your account to start preparing';
+      authError.style.display = 'none';
+    });
+
+    showLogin.addEventListener('click', (e) => {
+      e.preventDefault();
+      registerForm.style.display = 'none';
+      loginForm.style.display = 'block';
+      subtitle.textContent = 'Login to access your placement dashboard';
+      authError.style.display = 'none';
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      const result = await stateStore.login(email, password);
+      if (result.success) {
+        window.location.href = '/index.html';
+      } else {
+        authError.textContent = result.message || 'Login failed';
+        authError.style.display = 'block';
+      }
+    });
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      
+      const result = await stateStore.register(name, email, password);
+      if (result.success) {
+        window.location.href = '/index.html';
+      } else {
+        authError.textContent = result.message || 'Registration failed';
+        authError.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

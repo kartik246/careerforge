@@ -202,7 +202,7 @@ export const CompaniesView = {
     if (btnGotoPrep) {
       btnGotoPrep.addEventListener('click', () => {
         modal.style.display = 'none';
-        window.location.hash = '#prep';
+        window.location.href = '/prep.html';
       });
     }
 
@@ -211,7 +211,7 @@ export const CompaniesView = {
     if (btnGotoDsa) {
       btnGotoDsa.addEventListener('click', () => {
         modal.style.display = 'none';
-        window.location.hash = '#dsa';
+        window.location.href = '/dsa.html';
       });
     }
   }

@@ -3,10 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - CareerForge</title>
+  <title>DSA Sheet - CareerForge</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/src/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <!-- CodeMirror for real code editing -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/dracula.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/javascript/javascript.min.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -16,26 +20,25 @@
       <div id="header-placeholder"></div>
 
       <section class="content-body" id="content-body">
-        <!-- Dashboard content will be injected here -->
       </section>
     </main>
   </div>
 
   <script type="module">
     import { initLayout } from '/src/components/Layout.js';
-    import { DashboardView } from '/src/views/dashboard.js';
+    import { DsaView } from '/src/views/dsa.js';
     import { stateStore } from '/src/state.js';
     import { getQueryParams } from '/src/utils.js';
 
     document.addEventListener('DOMContentLoaded', () => {
-      initLayout('Dashboard Overview');
+      initLayout('DSA Progress Sheet');
       
       const container = document.getElementById('content-body');
       const params = getQueryParams();
       
       const render = () => {
-        container.innerHTML = DashboardView.getHTML(params);
-        DashboardView.init(params);
+        container.innerHTML = DsaView.getHTML(params);
+        DsaView.init(params);
       };
 
       stateStore.subscribe(render);
