@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareerForge - Job Portal & Placement Prep</title>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo-container">
+        <div class="logo-icon">CF</div>
+        <span class="logo-text">CareerForge</span>
+      </div>
+      
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="#dashboard">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#jobs">
+            <i class="fa-solid fa-briefcase"></i>
+            <span>Job Portal</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#prep">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>Preparation Hub</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#companies">
+            <i class="fa-solid fa-building"></i>
+            <span>Company Guides</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#dsa">
+            <i class="fa-solid fa-code"></i>
+            <span>DSA Sheet</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- User Profile Card -->
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="profile-avatar">K</div>
+        <div class="user-info">
+          <span class="user-name" id="profile-name">Kartikey</span>
+          <span class="user-role" id="profile-role">Candidate Mode</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Container -->
+    <main class="main-content">
+      <!-- Sticky Top Header -->
+      <header class="top-header">
+        <h1 class="view-title" id="page-title">Dashboard</h1>
+        <div class="header-actions">
+          <!-- Candidate / Employer Toggle -->
+          <div class="toggle-switch-container">
+            <span class="toggle-label" id="toggle-role-label">Recruiter Console</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="role-toggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </header>
+
+      <!-- View Mounting Content Container -->
+      <section class="content-body" id="content-body">
+        <!-- View elements will load here dynamically via client router -->
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
